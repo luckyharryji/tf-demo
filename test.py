@@ -67,6 +67,14 @@ import tensorflow as tf
 import numpy as np
 from sklearn.datasets import fetch_california_housing
 
+from datetime import datetime
+
+now = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+
+root_logdir = "tf_logs"
+
+logdir = "{}/run-{}/".format(root_logdir, now)
+
 # Download the data. California housing is a standard sklearn dataset, so we'll just use it from there.
 housing = fetch_california_housing()
 m, n = housing.data.shape
@@ -100,12 +108,17 @@ theta_update_op = tf.assign(theta, theta_new)
 
 init = tf.global_variables_initializer()
 
+mse_summary = tf.summary.scalar('MSE', mse)
+file_writer = tf.summary.FileWriter(logdir, tf.get_default_graph())
+
 # Run
 with tf.Session() as sess:
     sess.run(init)
     for epoch in range(n_epochs):
         if epoch % 100 == 0:
             print('Epoch', epoch, 'MSE =', mse.eval())
+        summary_str = mse_summary.eval(feed_dict={X: housing_data_with_bias_scaled, y: housing.target.reshape(-1, 1)})
+        file_writer.add_summary(summary_str, epoch)
         sess.run(theta_update_op)
 
     best_theta = theta.eval()

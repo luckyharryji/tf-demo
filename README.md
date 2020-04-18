@@ -6,3 +6,8 @@ install pip3
 intall python virtualenv, activate 
 
 install tensorflow
+
+
+tensorboard:
+
+> tensorboard --logdir tf_logs
